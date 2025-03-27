@@ -27,6 +27,7 @@ function cep_affiliate_hosting_settings_page() {
     }
 
     $links_table = $wpdb->prefix . 'cep_affiliate_links';
+    $clicks_table = $wpdb->prefix . 'cep_affiliate_clicks';
     $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'settings';
 
     // Inline styles for responsiveness
@@ -116,6 +117,7 @@ function cep_affiliate_hosting_settings_page() {
             <a href="?page=cep-affiliate-hosting&tab=api" class="nav-tab <?php echo $active_tab === 'api' ? 'nav-tab-active' : ''; ?>">API Integration</a>
             <a href="?page=cep-affiliate-hosting&tab=analytics" class="nav-tab <?php echo $active_tab === 'analytics' ? 'nav-tab-active' : ''; ?>">Analytics</a>
             <a href="?page=cep-affiliate-hosting&tab=content" class="nav-tab <?php echo $active_tab === 'content' ? 'nav-tab-active' : ''; ?>">Content Generator</a>
+            <a href="?page=cep-affiliate-hosting&tab=dashboard" class="nav-tab <?php echo $active_tab === 'dashboard' ? 'nav-tab-active' : ''; ?>">Dashboard</a>
         </h2>
 
         <?php if ($active_tab === 'settings'): ?>
@@ -252,6 +254,39 @@ function cep_affiliate_hosting_settings_page() {
                 </table>
                 <p><input type="submit" name="cep_generate_content" class="button button-primary" value="Generate Content"></p>
             </form>
+        <?php elseif ($active_tab === 'dashboard'): ?>
+            <h2>Affiliate Link Performance</h2>
+            <table class="widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th>Hosting Name</th>
+                        <th>Slug</th>
+                        <th>Clicks</th>
+                        <th>Top Referrer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $links = $wpdb->get_results("SELECT * FROM $links_table");
+                    if (empty($links)) {
+                        echo '<tr><td colspan="4">No data available.</td></tr>';
+                    } else {
+                        foreach ($links as $link) {
+                            $top_referrer = $wpdb->get_var($wpdb->prepare(
+                                "SELECT referrer FROM $clicks_table WHERE link_id = %d AND referrer IS NOT NULL GROUP BY referrer ORDER BY COUNT(*) DESC LIMIT 1",
+                                $link->id
+                            ));
+                            echo '<tr>';
+                            echo '<td>' . esc_html($link->hosting_name) . '</td>';
+                            echo '<td>' . esc_html($link->slug) . '</td>';
+                            echo '<td>' . intval($link->click_count) . '</td>';
+                            echo '<td>' . ($top_referrer ? esc_url($top_referrer) : 'N/A') . '</td>';
+                            echo '</tr>';
+                        }
+                    }
+                    ?>
+                </tbody>
+            </table>
         <?php endif; ?>
     </div>
     <?php

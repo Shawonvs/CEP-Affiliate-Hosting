@@ -33,6 +33,7 @@ function cep_affiliate_hosting_create_tables() {
             link_id BIGINT(20) UNSIGNED NOT NULL,
             ip_address VARCHAR(45) NOT NULL,
             user_agent TEXT NOT NULL,
+            referrer TEXT DEFAULT NULL,
             country VARCHAR(100) DEFAULT NULL,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (link_id) REFERENCES $links_table(id) ON DELETE CASCADE
