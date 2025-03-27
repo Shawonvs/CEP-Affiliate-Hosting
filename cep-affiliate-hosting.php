@@ -46,6 +46,12 @@ if (file_exists(CEP_AFFILIATE_HOSTING_PATH . 'includes/content-generator.php')) 
     error_log('Missing file: includes/content-generator.php');
 }
 
+if (file_exists(CEP_AFFILIATE_HOSTING_PATH . 'includes/content-inserter.php')) {
+    require_once CEP_AFFILIATE_HOSTING_PATH . 'includes/content-inserter.php';
+} else {
+    error_log('Missing file: includes/content-inserter.php');
+}
+
 if (file_exists(CEP_AFFILIATE_HOSTING_PATH . 'admin/settings.php')) {
     require_once CEP_AFFILIATE_HOSTING_PATH . 'admin/settings.php';
 } else {
