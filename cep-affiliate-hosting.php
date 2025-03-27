@@ -72,6 +72,13 @@ add_action('admin_menu', function () {
     }
 });
 
+// Enqueue admin styles for responsiveness
+add_action('admin_enqueue_scripts', function ($hook) {
+    if ($hook === 'toplevel_page_cep-affiliate-hosting') {
+        wp_enqueue_style('cep-affiliate-hosting-admin', CEP_AFFILIATE_HOSTING_URL . 'assets/css/admin-responsive.css', [], '1.0.0');
+    }
+});
+
 // Handle short URL redirection
 add_action('init', function () {
     try {

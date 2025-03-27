@@ -1,0 +1,27 @@
+/* General table responsiveness */
+@media (max-width: 768px) {
+    .widefat {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    .form-table th, .form-table td {
+        display: block;
+        width: 100%;
+    }
+    .form-table input, .form-table select {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .tablenav-pages {
+        text-align: center;
+    }
+}
+
+/* Adjust button sizes for smaller screens */
+@media (max-width: 480px) {
+    .button, .button-primary {
+        font-size: 14px;
+        padding: 8px 10px;
+    }
+}
