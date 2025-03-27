@@ -35,24 +35,38 @@ function cep_affiliate_hosting_settings_page() {
     }
 
     try {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cep_add_link'])) {
-            $hosting_name = isset($_POST['hosting_name']) ? sanitize_text_field($_POST['hosting_name']) : '';
-            $slug = isset($_POST['slug']) ? sanitize_title($_POST['slug']) : '';
-            $affiliate_url = isset($_POST['affiliate_url']) ? esc_url_raw($_POST['affiliate_url']) : '';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_POST['cep_add_link'])) {
+                $hosting_name = isset($_POST['hosting_name']) ? sanitize_text_field($_POST['hosting_name']) : '';
+                $slug = isset($_POST['slug']) ? sanitize_title($_POST['slug']) : '';
+                $affiliate_url = isset($_POST['affiliate_url']) ? esc_url_raw($_POST['affiliate_url']) : '';
 
-            if (!empty($hosting_name) && !empty($slug) && !empty($affiliate_url)) {
-                $inserted = $wpdb->insert($links_table, [
-                    'hosting_name' => $hosting_name,
-                    'slug' => $slug,
-                    'affiliate_url' => $affiliate_url,
-                ]);
+                if (!empty($hosting_name) && !empty($slug) && !empty($affiliate_url)) {
+                    $inserted = $wpdb->insert($links_table, [
+                        'hosting_name' => $hosting_name,
+                        'slug' => $slug,
+                        'affiliate_url' => $affiliate_url,
+                    ]);
 
-                if ($inserted === false) {
-                    error_log('Failed to insert affiliate link: ' . $wpdb->last_error);
-                    echo '<div class="error"><p>Failed to add the link. Please try again.</p></div>';
+                    if ($inserted === false) {
+                        error_log('Failed to insert affiliate link: ' . $wpdb->last_error);
+                        echo '<div class="error"><p>Failed to add the link. Please try again.</p></div>';
+                    }
+                } else {
+                    echo '<div class="error"><p>All fields are required.</p></div>';
                 }
-            } else {
-                echo '<div class="error"><p>All fields are required.</p></div>';
+            } elseif (isset($_POST['cep_fetch_links'])) {
+                $provider = sanitize_text_field($_POST['provider']);
+                $api_key = sanitize_text_field($_POST['api_key']);
+
+                $links = cep_fetch_affiliate_links($provider, $api_key);
+                if (is_wp_error($links)) {
+                    error_log('API Fetch Error: ' . $links->get_error_message());
+                    echo '<div class="error"><p>Failed to fetch affiliate links: ' . esc_html($links->get_error_message()) . '</p></div>';
+                } else {
+                    cep_store_affiliate_links($links);
+                    echo '<div class="updated"><p>Affiliate links fetched and stored successfully.</p></div>';
+                }
             }
         }
 
@@ -90,6 +104,26 @@ function cep_affiliate_hosting_settings_page() {
                 </tr>
             </table>
             <p><input type="submit" name="cep_add_link" class="button button-primary" value="Add Link"></p>
+        </form>
+        <form method="POST">
+            <h2>Fetch Affiliate Links</h2>
+            <table class="form-table">
+                <tr>
+                    <th><label for="provider">Provider</label></th>
+                    <td>
+                        <select name="provider" id="provider" required>
+                            <option value="bluehost">Bluehost</option>
+                            <option value="hostinger">Hostinger</option>
+                            <option value="siteground">SiteGround</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="api_key">API Key</label></th>
+                    <td><input type="text" name="api_key" id="api_key" required></td>
+                </tr>
+            </table>
+            <p><input type="submit" name="cep_fetch_links" class="button button-primary" value="Fetch Links"></p>
         </form>
         <h2>Existing Links</h2>
         <table class="widefat">
