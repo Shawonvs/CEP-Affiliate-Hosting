@@ -43,6 +43,10 @@ if (file_exists(CEP_AFFILIATE_HOSTING_PATH . 'admin/settings.php')) {
 // Activation hook: Create database tables with error handling
 register_activation_hook(__FILE__, function () {
     try {
+        if (!function_exists('cep_affiliate_hosting_create_tables')) {
+            error_log('Critical error: Function cep_affiliate_hosting_create_tables is not defined.');
+            return;
+        }
         cep_affiliate_hosting_create_tables();
     } catch (Exception $e) {
         error_log('Activation error: ' . $e->getMessage());
@@ -52,6 +56,10 @@ register_activation_hook(__FILE__, function () {
 // Add admin menu
 add_action('admin_menu', function () {
     try {
+        if (!function_exists('cep_affiliate_hosting_add_admin_menu')) {
+            error_log('Critical error: Function cep_affiliate_hosting_add_admin_menu is not defined.');
+            return;
+        }
         cep_affiliate_hosting_add_admin_menu();
     } catch (Exception $e) {
         error_log('Admin menu error: ' . $e->getMessage());
@@ -61,6 +69,10 @@ add_action('admin_menu', function () {
 // Handle short URL redirection
 add_action('init', function () {
     try {
+        if (!function_exists('cep_affiliate_hosting_handle_redirect')) {
+            error_log('Critical error: Function cep_affiliate_hosting_handle_redirect is not defined.');
+            return;
+        }
         cep_affiliate_hosting_handle_redirect();
     } catch (Exception $e) {
         error_log('Redirection error: ' . $e->getMessage());
