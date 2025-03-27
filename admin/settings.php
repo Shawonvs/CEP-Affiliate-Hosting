@@ -84,6 +84,26 @@ function cep_affiliate_hosting_settings_page() {
         echo '<div class="updated"><p>API keys saved successfully.</p></div>';
     }
 
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cep_generate_content'])) {
+        check_admin_referer('cep_generate_content_action', 'cep_generate_content_nonce');
+
+        $topic = sanitize_text_field($_POST['topic']);
+        $keywords = sanitize_text_field($_POST['keywords']);
+        $api_key = get_option('cep_openai_api_key', '');
+
+        if (empty($api_key)) {
+            echo '<div class="error"><p>OpenAI API key is not configured. Please add it in the API Integration tab.</p></div>';
+        } else {
+            $content = cep_generate_blog_post($topic, $keywords, $api_key);
+            if (is_wp_error($content)) {
+                echo '<div class="error"><p>Failed to generate content: ' . esc_html($content->get_error_message()) . '</p></div>';
+            } else {
+                echo '<div class="updated"><p>Content generated successfully. You can copy it below:</p></div>';
+                echo '<textarea rows="10" style="width:100%;">' . esc_textarea($content) . '</textarea>';
+            }
+        }
+    }
+
     $bluehost_api_key = get_option('cep_bluehost_api_key', '');
     $hostinger_api_key = get_option('cep_hostinger_api_key', '');
     $siteground_api_key = get_option('cep_siteground_api_key', '');
@@ -95,6 +115,7 @@ function cep_affiliate_hosting_settings_page() {
             <a href="?page=cep-affiliate-hosting&tab=settings" class="nav-tab <?php echo $active_tab === 'settings' ? 'nav-tab-active' : ''; ?>">Settings</a>
             <a href="?page=cep-affiliate-hosting&tab=api" class="nav-tab <?php echo $active_tab === 'api' ? 'nav-tab-active' : ''; ?>">API Integration</a>
             <a href="?page=cep-affiliate-hosting&tab=analytics" class="nav-tab <?php echo $active_tab === 'analytics' ? 'nav-tab-active' : ''; ?>">Analytics</a>
+            <a href="?page=cep-affiliate-hosting&tab=content" class="nav-tab <?php echo $active_tab === 'content' ? 'nav-tab-active' : ''; ?>">Content Generator</a>
         </h2>
 
         <?php if ($active_tab === 'settings'): ?>
@@ -215,6 +236,22 @@ function cep_affiliate_hosting_settings_page() {
                     ?>
                 </tbody>
             </table>
+        <?php elseif ($active_tab === 'content'): ?>
+            <form method="POST">
+                <?php wp_nonce_field('cep_generate_content_action', 'cep_generate_content_nonce'); ?>
+                <h2>Generate Blog Post</h2>
+                <table class="form-table">
+                    <tr>
+                        <th><label for="topic">Topic</label></th>
+                        <td><input type="text" name="topic" id="topic" required class="regular-text"></td>
+                    </tr>
+                    <tr>
+                        <th><label for="keywords">Keywords</label></th>
+                        <td><input type="text" name="keywords" id="keywords" placeholder="e.g., hosting, WordPress, SEO" class="regular-text"></td>
+                    </tr>
+                </table>
+                <p><input type="submit" name="cep_generate_content" class="button button-primary" value="Generate Content"></p>
+            </form>
         <?php endif; ?>
     </div>
     <?php
