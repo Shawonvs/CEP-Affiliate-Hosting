@@ -28,6 +28,12 @@ function cep_affiliate_hosting_settings_page() {
 
     $links_table = $wpdb->prefix . 'cep_affiliate_links';
 
+    $search_query = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
+    $query = "SELECT * FROM $links_table";
+    if (!empty($search_query)) {
+        $query .= $wpdb->prepare(" WHERE hosting_name LIKE %s OR slug LIKE %s", "%$search_query%", "%$search_query%");
+    }
+
     try {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cep_add_link'])) {
             $hosting_name = isset($_POST['hosting_name']) ? sanitize_text_field($_POST['hosting_name']) : '';
@@ -50,7 +56,7 @@ function cep_affiliate_hosting_settings_page() {
             }
         }
 
-        $links = $wpdb->get_results("SELECT * FROM $links_table");
+        $links = $wpdb->get_results($query);
         if ($links === false) {
             error_log('Failed to fetch affiliate links: ' . $wpdb->last_error);
             $links = [];
@@ -63,6 +69,11 @@ function cep_affiliate_hosting_settings_page() {
     ?>
     <div class="wrap">
         <h1>Affiliate Hosting Links</h1>
+        <form method="GET">
+            <input type="hidden" name="page" value="cep-affiliate-hosting">
+            <input type="text" name="search" placeholder="Search links..." value="<?php echo esc_attr($search_query); ?>">
+            <button type="submit" class="button">Search</button>
+        </form>
         <form method="POST">
             <table class="form-table">
                 <tr>
@@ -91,14 +102,20 @@ function cep_affiliate_hosting_settings_page() {
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($links as $link): ?>
+                <?php if (empty($links)): ?>
                     <tr>
-                        <td><?php echo esc_html($link->hosting_name); ?></td>
-                        <td><?php echo esc_html($link->slug); ?></td>
-                        <td><?php echo esc_url($link->affiliate_url); ?></td>
-                        <td><?php echo intval($link->click_count); ?></td>
+                        <td colspan="4">No links found.</td>
                     </tr>
-                <?php endforeach; ?>
+                <?php else: ?>
+                    <?php foreach ($links as $link): ?>
+                        <tr></tr>
+                            <td><?php echo esc_html($link->hosting_name); ?></td>
+                            <td><?php echo esc_html($link->slug); ?></td>
+                            <td><?php echo esc_url($link->affiliate_url); ?></td>
+                            <td><?php echo intval($link->click_count); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>

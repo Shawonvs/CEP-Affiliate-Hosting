@@ -73,7 +73,31 @@ add_action('init', function () {
             error_log('Critical error: Function cep_affiliate_hosting_handle_redirect is not defined.');
             return;
         }
-        cep_affiliate_hosting_handle_redirect();
+
+        if (isset($_GET['cep_redirect'])) {
+            global $wpdb;
+
+            $slug = sanitize_title($_GET['cep_redirect']);
+            $links_table = $wpdb->prefix . 'cep_affiliate_links';
+            $clicks_table = $wpdb->prefix . 'cep_affiliate_clicks';
+
+            $link = $wpdb->get_row($wpdb->prepare("SELECT * FROM $links_table WHERE slug = %s", $slug));
+            if ($link) {
+                // Increment click count
+                $wpdb->update($links_table, ['click_count' => $link->click_count + 1], ['id' => $link->id]);
+
+                // Log click details
+                $wpdb->insert($clicks_table, [
+                    'link_id' => $link->id,
+                    'ip_address' => $_SERVER['REMOTE_ADDR'],
+                    'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+                ]);
+
+                // Redirect to affiliate URL
+                wp_redirect($link->affiliate_url, 301);
+                exit;
+            }
+        }
     } catch (Exception $e) {
         error_log('Redirection error: ' . $e->getMessage());
     }
