@@ -52,6 +52,12 @@ if (file_exists(CEP_AFFILIATE_HOSTING_PATH . 'includes/content-inserter.php')) {
     error_log('Missing file: includes/content-inserter.php');
 }
 
+if (file_exists(CEP_AFFILIATE_HOSTING_PATH . 'includes/comparison-table.php')) {
+    require_once CEP_AFFILIATE_HOSTING_PATH . 'includes/comparison-table.php';
+} else {
+    error_log('Missing file: includes/comparison-table.php');
+}
+
 if (file_exists(CEP_AFFILIATE_HOSTING_PATH . 'admin/settings.php')) {
     require_once CEP_AFFILIATE_HOSTING_PATH . 'admin/settings.php';
 } else {
