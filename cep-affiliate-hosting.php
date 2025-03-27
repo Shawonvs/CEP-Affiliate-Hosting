@@ -40,11 +40,29 @@ if (file_exists(CEP_AFFILIATE_HOSTING_PATH . 'admin/settings.php')) {
     error_log('Missing file: admin/settings.php');
 }
 
-// Activation hook: Create database tables
-register_activation_hook(__FILE__, 'cep_affiliate_hosting_create_tables');
+// Activation hook: Create database tables with error handling
+register_activation_hook(__FILE__, function () {
+    try {
+        cep_affiliate_hosting_create_tables();
+    } catch (Exception $e) {
+        error_log('Activation error: ' . $e->getMessage());
+    }
+});
 
 // Add admin menu
-add_action('admin_menu', 'cep_affiliate_hosting_add_admin_menu');
+add_action('admin_menu', function () {
+    try {
+        cep_affiliate_hosting_add_admin_menu();
+    } catch (Exception $e) {
+        error_log('Admin menu error: ' . $e->getMessage());
+    }
+});
 
 // Handle short URL redirection
-add_action('init', 'cep_affiliate_hosting_handle_redirect');
+add_action('init', function () {
+    try {
+        cep_affiliate_hosting_handle_redirect();
+    } catch (Exception $e) {
+        error_log('Redirection error: ' . $e->getMessage());
+    }
+});

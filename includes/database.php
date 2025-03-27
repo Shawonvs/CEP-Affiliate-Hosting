@@ -33,5 +33,12 @@ function cep_affiliate_hosting_create_tables() {
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     dbDelta($links_sql);
+    if (!empty($wpdb->last_error)) {
+        error_log('Error creating links table: ' . $wpdb->last_error);
+    }
+
     dbDelta($clicks_sql);
+    if (!empty($wpdb->last_error)) {
+        error_log('Error creating clicks table: ' . $wpdb->last_error);
+    }
 }

@@ -22,18 +22,31 @@ function cep_affiliate_hosting_settings_page() {
     $links_table = $wpdb->prefix . 'cep_affiliate_links';
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cep_add_link'])) {
-        $hosting_name = sanitize_text_field($_POST['hosting_name']);
-        $slug = sanitize_title($_POST['slug']);
-        $affiliate_url = esc_url_raw($_POST['affiliate_url']);
+        $hosting_name = isset($_POST['hosting_name']) ? sanitize_text_field($_POST['hosting_name']) : '';
+        $slug = isset($_POST['slug']) ? sanitize_title($_POST['slug']) : '';
+        $affiliate_url = isset($_POST['affiliate_url']) ? esc_url_raw($_POST['affiliate_url']) : '';
 
-        $wpdb->insert($links_table, [
-            'hosting_name' => $hosting_name,
-            'slug' => $slug,
-            'affiliate_url' => $affiliate_url,
-        ]);
+        if (!empty($hosting_name) && !empty($slug) && !empty($affiliate_url)) {
+            $inserted = $wpdb->insert($links_table, [
+                'hosting_name' => $hosting_name,
+                'slug' => $slug,
+                'affiliate_url' => $affiliate_url,
+            ]);
+
+            if ($inserted === false) {
+                error_log('Failed to insert affiliate link: ' . $wpdb->last_error);
+                echo '<div class="error"><p>Failed to add the link. Please try again.</p></div>';
+            }
+        } else {
+            echo '<div class="error"><p>All fields are required.</p></div>';
+        }
     }
 
     $links = $wpdb->get_results("SELECT * FROM $links_table");
+    if ($links === false) {
+        error_log('Failed to fetch affiliate links: ' . $wpdb->last_error);
+        $links = [];
+    }
 
     ?>
     <div class="wrap">
