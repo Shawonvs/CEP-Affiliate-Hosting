@@ -133,3 +133,84 @@ add_action('init', function () {
         error_log('Redirection error: ' . $e->getMessage());
     }
 });
+
+// Add AI Content Generator admin page
+add_action('admin_menu', function () {
+    add_submenu_page(
+        'toplevel_page_cep-affiliate-hosting',
+        'AI Content Generator',
+        'AI Content Generator',
+        'manage_options',
+        'cep-ai-content-generator',
+        'cep_affiliate_hosting_ai_content_generator_page'
+    );
+});
+
+// Render AI Content Generator page
+function cep_affiliate_hosting_ai_content_generator_page() {
+    ?>
+    <div class="wrap">
+        <h1>AI Content Generator</h1>
+        <form method="post" action="">
+            <?php wp_nonce_field('cep_generate_ai_content', 'cep_ai_content_nonce'); ?>
+            <table class="form-table">
+                <tr>
+                    <th scope="row"><label for="cep_keywords">Keywords/Topics</label></th>
+                    <td><input type="text" name="cep_keywords" id="cep_keywords" class="regular-text" required></td>
+                </tr>
+            </table>
+            <p class="submit">
+                <input type="submit" name="cep_generate_content" id="cep_generate_content" class="button button-primary" value="Generate Content">
+            </p>
+        </form>
+        <?php
+        if (isset($_POST['cep_generate_content']) && check_admin_referer('cep_generate_ai_content', 'cep_ai_content_nonce')) {
+            $keywords = sanitize_text_field($_POST['cep_keywords']);
+            $content = cep_affiliate_hosting_generate_ai_content($keywords);
+            if ($content) {
+                echo '<h2>Generated Content</h2>';
+                echo '<textarea readonly rows="10" style="width: 100%;">' . esc_textarea($content) . '</textarea>';
+            } else {
+                echo '<p style="color: red;">Failed to generate content. Please check the API configuration.</p>';
+            }
+        }
+        ?>
+    </div>
+    <?php
+}
+
+// Generate AI content using OpenAI/Gemini API
+function cep_affiliate_hosting_generate_ai_content($keywords) {
+    $api_key = get_option('cep_openai_api_key'); // Ensure this option is set in plugin settings
+    if (!$api_key) {
+        error_log('OpenAI API key is not configured.');
+        return false;
+    }
+
+    $endpoint = 'https://api.openai.com/v1/completions'; // Update for Gemini if needed
+    $response = wp_remote_post($endpoint, [
+        'headers' => [
+            'Authorization' => 'Bearer ' . $api_key,
+            'Content-Type' => 'application/json',
+        ],
+        'body' => json_encode([
+            'model' => 'text-davinci-003', // Update model as needed
+            'prompt' => "Write a detailed, SEO-optimized blog post about: $keywords. Use the following structure:\n\n"
+                . "1. Catchy Headline with Main Keyword\n"
+                . "2. Introduction with a call-to-action for an affiliate link\n"
+                . "3. Pros and Cons section for hosting services\n"
+                . "4. Feature comparison table (if multiple hosting services are mentioned)\n"
+                . "5. Conclusion with a strong affiliate call-to-action\n\n"
+                . "Ensure the content is engaging, informative, and persuasive.",
+            'max_tokens' => 1500,
+        ]),
+    ]);
+
+    if (is_wp_error($response)) {
+        error_log('API request failed: ' . $response->get_error_message());
+        return false;
+    }
+
+    $body = json_decode(wp_remote_retrieve_body($response), true);
+    return $body['choices'][0]['text'] ?? false;
+}
