@@ -118,6 +118,7 @@ function cep_affiliate_hosting_settings_page() {
             <a href="?page=cep-affiliate-hosting&tab=analytics" class="nav-tab <?php echo $active_tab === 'analytics' ? 'nav-tab-active' : ''; ?>">Analytics</a>
             <a href="?page=cep-affiliate-hosting&tab=content" class="nav-tab <?php echo $active_tab === 'content' ? 'nav-tab-active' : ''; ?>">Content Generator</a>
             <a href="?page=cep-affiliate-hosting&tab=dashboard" class="nav-tab <?php echo $active_tab === 'dashboard' ? 'nav-tab-active' : ''; ?>">Dashboard</a>
+            <a href="?page=cep-affiliate-hosting&tab=marketing" class="nav-tab <?php echo $active_tab === 'marketing' ? 'nav-tab-active' : ''; ?>">Marketing Decisions</a>
         </h2>
 
         <?php if ($active_tab === 'settings'): ?>
@@ -287,6 +288,38 @@ function cep_affiliate_hosting_settings_page() {
                     ?>
                 </tbody>
             </table>
+        <?php elseif ($active_tab === 'marketing'): ?>
+            <form method="POST">
+                <?php wp_nonce_field('cep_generate_marketing_action', 'cep_generate_marketing_nonce'); ?>
+                <h2>Generate Marketing Decisions</h2>
+                <table class="form-table">
+                    <tr>
+                        <th><label for="marketing_data">Marketing Data</label></th>
+                        <td><textarea name="marketing_data" id="marketing_data" rows="5" class="large-text" required></textarea></td>
+                    </tr>
+                </table>
+                <p><input type="submit" name="cep_generate_marketing" class="button button-primary" value="Generate Decision"></p>
+            </form>
+            <?php
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cep_generate_marketing'])) {
+                check_admin_referer('cep_generate_marketing_action', 'cep_generate_marketing_nonce');
+
+                $marketing_data = sanitize_textarea_field($_POST['marketing_data']);
+                $api_key = get_option('cep_openai_api_key', '');
+
+                if (empty($api_key)) {
+                    echo '<div class="error"><p>OpenAI API key is not configured. Please add it in the API Integration tab.</p></div>';
+                } else {
+                    $decision = cep_generate_marketing_decision($marketing_data, $api_key);
+                    if (is_wp_error($decision)) {
+                        echo '<div class="error"><p>Failed to generate decision: ' . esc_html($decision->get_error_message()) . '</p></div>';
+                    } else {
+                        echo '<div class="updated"><p>Marketing decision generated successfully. See below:</p></div>';
+                        echo '<textarea rows="10" style="width:100%;">' . esc_textarea($decision) . '</textarea>';
+                    }
+                }
+            }
+            ?>
         <?php endif; ?>
     </div>
     <?php
