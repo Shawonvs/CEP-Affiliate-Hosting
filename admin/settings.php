@@ -292,10 +292,11 @@ function cep_affiliate_hosting_settings_page() {
     <?php
 }
 
-if (!function_exists('cep_generate_blog_post')) {
-    function cep_generate_blog_post($content) {
-        // Function implementation
-    }
+// Ensure missing file is handled gracefully
+if (!file_exists(plugin_dir_path(__FILE__) . '../includes/tracker.php')) {
+    error_log('Missing file: includes/tracker.php');
+} else {
+    include_once plugin_dir_path(__FILE__) . '../includes/tracker.php';
 }
 
 function cep_generate_blog_post($topic, $keywords, $api_key) {
