@@ -292,6 +292,12 @@ function cep_affiliate_hosting_settings_page() {
     <?php
 }
 
+if (!function_exists('cep_generate_blog_post')) {
+    function cep_generate_blog_post($content) {
+        // Function implementation
+    }
+}
+
 function cep_generate_blog_post($topic, $keywords, $api_key) {
     $endpoint = 'https://api.openai.com/v1/completions'; // Update for Gemini if needed
     $response = wp_remote_post($endpoint, [
