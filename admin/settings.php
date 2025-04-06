@@ -299,34 +299,6 @@ if (!file_exists(plugin_dir_path(__FILE__) . '../includes/tracker.php')) {
     include_once plugin_dir_path(__FILE__) . '../includes/tracker.php';
 }
 
-function cep_generate_blog_post($topic, $keywords, $api_key) {
-    $endpoint = 'https://api.openai.com/v1/completions'; // Update for Gemini if needed
-    $response = wp_remote_post($endpoint, [
-        'headers' => [
-            'Authorization' => 'Bearer ' . $api_key,
-            'Content-Type' => 'application/json',
-        ],
-        'body' => json_encode([
-            'model' => 'text-davinci-003', // Update model as needed
-            'prompt' => "Write a detailed, SEO-optimized blog post about: $topic. Use the following structure:\n\n"
-                . "1. Catchy Headline with Main Keyword\n"
-                . "2. Introduction with a call-to-action for an affiliate link\n"
-                . "3. Pros and Cons section for hosting services\n"
-                . "4. Feature comparison table (if multiple hosting services are mentioned)\n"
-                . "5. Conclusion with a strong affiliate call-to-action\n\n"
-                . "Ensure the content is engaging, informative, and persuasive. Include relevant keywords: $keywords.",
-            'max_tokens' => 1500,
-        ]),
-    ]);
-
-    if (is_wp_error($response)) {
-        return new WP_Error('api_error', 'API request failed: ' . $response->get_error_message());
-    }
-
-    $body = json_decode(wp_remote_retrieve_body($response), true);
-    return $body['choices'][0]['text'] ?? new WP_Error('api_error', 'Failed to retrieve content from API.');
-}
-
 add_action('admin_init', function () {
     register_setting('cep_affiliate_hosting_settings', 'cep_openai_api_key');
 
