@@ -1,0 +1,62 @@
+.cep-affiliate-offers-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin: 24px 0;
+}
+.cep-affiliate-offer-card {
+    background: #fff;
+    border: 1px solid #e2e2e2;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 24px 18px 18px 18px;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: box-shadow 0.2s;
+}
+.cep-affiliate-offer-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+.cep-affiliate-offer-title {
+    font-size: 1.25em;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #222;
+}
+.cep-affiliate-offer-price {
+    font-size: 1.1em;
+    color: #0073aa;
+    margin-bottom: 10px;
+}
+.cep-affiliate-offer-features {
+    margin: 0 0 16px 0;
+    padding-left: 18px;
+    font-size: 0.98em;
+}
+.cep-affiliate-offer-features li {
+    margin-bottom: 4px;
+}
+.cep-affiliate-offer-cta {
+    display: inline-block;
+    background: #0073aa;
+    color: #fff !important;
+    padding: 10px 22px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: auto;
+    transition: background 0.2s;
+}
+.cep-affiliate-offer-cta:hover {
+    background: #005177;
+}
+.cep-affiliate-offers-empty {
+    padding: 18px;
+    background: #f8f8f8;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    color: #888;
+    text-align: center;
+}
